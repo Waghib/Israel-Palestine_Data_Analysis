@@ -5,6 +5,8 @@ import seaborn as sns
 import tkinter as tk
 import customtkinter as ctk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import statsmodels.api as sm
+from sklearn.preprocessing import LabelEncoder
 
 import warnings                    ## Filter warnings
 warnings.filterwarnings('ignore')
@@ -112,7 +114,281 @@ def groupResponsiblePieChart():
     ax6.set_title('Distribution of Fatalities by Group Responsible')
     return fig6, ax6
 
-# casualitiesYearWise()
-# groupResponsibleBarChart()
-# ageDataHistogram()
-# genderPlot()
+def yearCasualities():
+    label_encoder = LabelEncoder()
+    df['encoded_location'] = label_encoder.fit_transform(df['event_location_region'])
+    df['encoded_gender'] = label_encoder.fit_transform(df['gender'])
+
+    # Count occurrences of each combination of 'year_of_death' and 'encoded_location'
+    grouped_data = df.groupby(['year_of_death', 'encoded_location', 'encoded_gender']).size().reset_index(name='casualties')
+
+    # Extract independent variables
+    X = grouped_data[['year_of_death', 'encoded_location', 'encoded_gender']]
+    m = sm.add_constant(X)
+
+    # Extract dependent variable
+    y = grouped_data['casualties']
+
+    # Perform linear regression using statsmodels for p-values
+    model = sm.OLS(y, m).fit()
+
+    # Print summary
+    # print(model.summary())
+
+    predictions = model.predict(m)
+
+    # Add the predictions to the grouped_data DataFrame
+    grouped_data['predicted_casualties'] = predictions
+
+    # Create scatter plots for each variable against y
+    fig7, ax7 = plt.subplots()
+
+    # Scatter plot
+    sns.scatterplot(x=grouped_data['year_of_death'], y=y, label='Actual Casualties', ax=ax7)
+
+    # Plot the best-fit line
+    sns.lineplot(x=grouped_data['year_of_death'], y=predictions, color='red', label='Best-Fit Line', ax=ax7)
+
+    ax7.set_xlabel('Year of Death')
+    ax7.set_ylabel('Casualties')
+    ax7.set_title('Scatter Plot with Best-Fit Line for Year of Death')
+    ax7.legend()
+
+    # plt.show()
+
+    return fig7, ax7
+
+def locationCasualities():
+    label_encoder = LabelEncoder()
+    df['encoded_location'] = label_encoder.fit_transform(df['event_location_region'])
+    df['encoded_gender'] = label_encoder.fit_transform(df['gender'])
+
+    # Count occurrences of each combination of 'year_of_death' and 'encoded_location'
+    grouped_data = df.groupby(['year_of_death', 'encoded_location', 'encoded_gender']).size().reset_index(name='casualties')
+
+    # Extract independent variables
+    X = grouped_data[['year_of_death', 'encoded_location', 'encoded_gender']]
+    m = sm.add_constant(X)
+
+    # Extract dependent variable
+    y = grouped_data['casualties']
+
+    # Perform linear regression using statsmodels for p-values
+    model = sm.OLS(y, m).fit()
+
+    # Print summary
+    # print(model.summary())
+
+    predictions = model.predict(m)
+
+    # Add the predictions to the grouped_data DataFrame
+    grouped_data['predicted_casualties'] = predictions
+
+    # Create scatter plots for each variable against y
+    fig8, ax8 = plt.subplots()
+
+    # Scatter plot
+    sns.scatterplot(x=grouped_data['encoded_location'], y=y, label='Actual Casualties', ax=ax8)
+
+    # Plot the best-fit line
+    sns.lineplot(x=grouped_data['encoded_location'], y=predictions, color='red', label='Best-Fit Line', ax=ax8)
+
+    ax8.set_xlabel('Encoded Location')
+    ax8.set_ylabel('Casualties')
+    ax8.set_title('Scatter Plot with Best-Fit Line for Location')
+    ax8.legend()
+
+    # plt.show()
+
+    return fig8, ax8
+
+def genderCasualities():
+    label_encoder = LabelEncoder()
+    df['encoded_location'] = label_encoder.fit_transform(df['event_location_region'])
+    df['encoded_gender'] = label_encoder.fit_transform(df['gender'])
+
+    # Count occurrences of each combination of 'year_of_death' and 'encoded_location'
+    grouped_data = df.groupby(['year_of_death', 'encoded_location', 'encoded_gender']).size().reset_index(name='casualties')
+
+    # Extract independent variables
+    X = grouped_data[['year_of_death', 'encoded_location', 'encoded_gender']]
+    m = sm.add_constant(X)
+
+    # Extract dependent variable
+    y = grouped_data['casualties']
+
+    # Perform linear regression using statsmodels for p-values
+    model = sm.OLS(y, m).fit()
+
+    # Print summary
+    # print(model.summary())
+
+    predictions = model.predict(m)
+
+    # Add the predictions to the grouped_data DataFrame
+    grouped_data['predicted_casualties'] = predictions
+
+    # Create scatter plots for each variable against y
+    fig9, ax9 = plt.subplots()
+
+    # Scatter plot
+    sns.scatterplot(x=grouped_data['encoded_gender'], y=y, label='Actual Casualties', ax=ax9)
+
+    # Plot the best-fit line
+    sns.lineplot(x=grouped_data['encoded_gender'], y=predictions, color='red', label='Best-Fit Line', ax=ax9)
+
+    ax9.set_xlabel('Encoded Gender')
+    ax9.set_ylabel('Casualties')
+    ax9.set_title('Scatter Plot with Best-Fit Line for Gender')
+    ax9.legend()
+
+    # plt.show()
+
+    return fig9, ax9
+
+def yearConfidenceInterval():
+    label_encoder = LabelEncoder()
+    df['encoded_location'] = label_encoder.fit_transform(df['event_location_region'])
+    df['encoded_gender'] = label_encoder.fit_transform(df['gender'])
+
+    # Count occurrences of each combination of 'year_of_death' and 'encoded_location'
+    grouped_data = df.groupby(['year_of_death', 'encoded_location', 'encoded_gender']).size().reset_index(name='casualties')
+
+    # Extract independent variables
+    X = grouped_data[['year_of_death', 'encoded_location', 'encoded_gender']]
+    X = sm.add_constant(X)
+
+    # Extract dependent variable
+    y = grouped_data['casualties']
+
+    # Perform linear regression using statsmodels for p-values
+    model = sm.OLS(y, X).fit()
+
+    # Get predictions and confidence intervals
+    predictions = model.get_prediction(X)
+    predictions_summary = predictions.summary_frame()
+
+    # Add the predicted values and confidence intervals to the grouped_data DataFrame
+    grouped_data['predicted_casualties'] = predictions_summary['mean']
+    grouped_data['lower_ci'] = predictions_summary['obs_ci_lower']
+    grouped_data['upper_ci'] = predictions_summary['obs_ci_upper']
+
+    # Create scatter plots for each variable against y
+    fig, ax = plt.subplots()
+    # Scatter plot
+    sns.scatterplot(x=grouped_data['year_of_death'], y=y, label='Actual Casualties', ax=ax)
+    # Plot the best-fit line
+    sns.lineplot(x=grouped_data['year_of_death'], y=grouped_data['predicted_casualties'], color='red', label='Best-Fit Line', ax=ax)
+    # Plot confidence intervals
+    plt.fill_between(grouped_data['year_of_death'], grouped_data['lower_ci'], grouped_data['upper_ci'], color='red', alpha=0.2, label='95% Confidence Interval')
+
+    ax.set_xlabel('year_of_death')
+    ax.set_ylabel('Casualties')
+    ax.set_title(f'Best-Fit Line and Confidence Intervals for year of death')
+    ax.legend()
+    # plt.show()
+    return fig, ax
+
+def locationConfidenceInterval():
+    label_encoder = LabelEncoder()
+    df['encoded_location'] = label_encoder.fit_transform(df['event_location_region'])
+    df['encoded_gender'] = label_encoder.fit_transform(df['gender'])
+
+    # Count occurrences of each combination of 'year_of_death' and 'encoded_location'
+    grouped_data = df.groupby(['year_of_death', 'encoded_location', 'encoded_gender']).size().reset_index(name='casualties')
+
+    # Extract independent variables
+    X = grouped_data[['year_of_death', 'encoded_location', 'encoded_gender']]
+    X = sm.add_constant(X)
+
+    # Extract dependent variable
+    y = grouped_data['casualties']
+
+    # Perform linear regression using statsmodels for p-values
+    model = sm.OLS(y, X).fit()
+
+    # Get predictions and confidence intervals
+    predictions = model.get_prediction(X)
+    predictions_summary = predictions.summary_frame()
+
+    # Add the predicted values and confidence intervals to the grouped_data DataFrame
+    grouped_data['predicted_casualties'] = predictions_summary['mean']
+    grouped_data['lower_ci'] = predictions_summary['obs_ci_lower']
+    grouped_data['upper_ci'] = predictions_summary['obs_ci_upper']
+
+    # Create scatter plots for each variable against y
+    fig, ax = plt.subplots()
+    # Scatter plot
+    sns.scatterplot(x=grouped_data['encoded_location'], y=y, label='Actual Casualties', ax=ax)
+    # Plot the best-fit line
+    sns.lineplot(x=grouped_data['encoded_location'], y=grouped_data['predicted_casualties'], color='red', label='Best-Fit Line', ax=ax)
+    # Plot confidence intervals
+    plt.fill_between(grouped_data['encoded_location'], grouped_data['lower_ci'], grouped_data['upper_ci'], color='red', alpha=0.2, label='95% Confidence Interval', )
+
+    ax.set_xlabel('encoded_location')
+    ax.set_ylabel('Casualties')
+    ax.set_title(f'Best-Fit Line and Confidence Intervals for location')
+    ax.legend()
+    # plt.show()
+    return fig, ax
+
+def genderConfidenceInterval():
+    label_encoder = LabelEncoder()
+    df['encoded_location'] = label_encoder.fit_transform(df['event_location_region'])
+    df['encoded_gender'] = label_encoder.fit_transform(df['gender'])
+
+    # Count occurrences of each combination of 'year_of_death' and 'encoded_location'
+    grouped_data = df.groupby(['year_of_death', 'encoded_location', 'encoded_gender']).size().reset_index(name='casualties')
+
+    # Extract independent variables
+    X = grouped_data[['year_of_death', 'encoded_location', 'encoded_gender']]
+    X = sm.add_constant(X)
+
+    # Extract dependent variable
+    y = grouped_data['casualties']
+
+    # Perform linear regression using statsmodels for p-values
+    model = sm.OLS(y, X).fit()
+
+    # Get predictions and confidence intervals
+    predictions = model.get_prediction(X)
+    predictions_summary = predictions.summary_frame()
+
+    # Add the predicted values and confidence intervals to the grouped_data DataFrame
+    grouped_data['predicted_casualties'] = predictions_summary['mean']
+    grouped_data['lower_ci'] = predictions_summary['obs_ci_lower']
+    grouped_data['upper_ci'] = predictions_summary['obs_ci_upper']
+
+    # Create scatter plots for each variable against y
+    fig, ax = plt.subplots()
+    
+    # Scatter plot
+    sns.scatterplot(x=grouped_data['encoded_gender'], y=y, label='Actual Casualties', ax=ax)
+    # Plot the best-fit line
+    sns.lineplot(x=grouped_data['encoded_gender'], y=grouped_data['predicted_casualties'], color='red', label='Best-Fit Line', ax=ax)
+    # Plot confidence intervals
+    plt.fill_between(grouped_data['encoded_gender'], grouped_data['lower_ci'], grouped_data['upper_ci'], color='red', alpha=0.2, label='95% Confidence Interval')
+
+    ax.set_xlabel('encoded_gender')
+    ax.set_ylabel('Casualties')
+    ax.set_title(f'Best-Fit Line and Confidence Intervals for gender')
+    ax.legend()
+
+    # plt.show()
+    return fig, ax
+
+def probabiltyForChildren():
+    for i in df['citizenship'].drop_duplicates():
+        total_count = len(df[df['age'] <= 18])
+        count_below_18 = len(df[(df['citizenship'] == i) & (df['age'] <= 18)])
+        
+        probability = count_below_18 / total_count if total_count > 0 else 0
+        print(i, " = ", probability)
+
+def probabiltyForWomen():
+    print("For women")
+    for i in df['citizenship'].drop_duplicates():
+        total_count = len(df[df['gender'] == 'F'])
+        count_For_F = len(df[(df['citizenship'] == i) & (df['gender'] == 'F')])
+        probability = count_For_F / total_count if total_count > 0 else 0
+        print(i, " = ", probability)
